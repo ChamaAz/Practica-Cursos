@@ -2,6 +2,7 @@
 
 ![PHP](https://img.shields.io/badge/PHP-8.2-blue)
 ![MySQL](https://img.shields.io/badge/MySQL-8-orange)
+![phpMyAdmin](https://img.shields.io/badge/phpMyAdmin-5.2.0-blueviolet)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 Aplicación web desarrollada en **PHP** para la gestión de inscripciones a cursos de formación de un centro de profesores.  
