@@ -50,4 +50,4 @@ Permite **gestionar solicitudes, asignar plazas automáticamente según méritos
 1. Clonar el repositorio:
 
 ```bash
-git clone https://github.com/tuusuario/cursoscp-php.git
+git clone https://github.com/ChamaAz/Practica-Cursos.git
