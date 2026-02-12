@@ -48,7 +48,12 @@ Permite gestionar solicitudes, asignar plazas automáticamente según méritos y
 - Código modular: uso de funciones para mantener la aplicación organizada.
 
 ---
+📧 Contacto
 
+Autor: Chaimae Azougagh
+GitHub: ChamaAz
+LinkedIn: Chaimae Azougagh
+---
 ## 🚀 Cómo ejecutar la aplicación
 
 1. Clonar el repositorio:
