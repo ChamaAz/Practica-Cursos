@@ -1,6 +1,6 @@
 <?php
-require 'conexion.php'; // Incluir la conexión a la base de datos
-// Verificar si el administrador está autenticado
+require 'conexion.php';
+// Verificar si el administrador esta autenticado
 if (isset($_SESSION['dni'])) {
     header("Location: index.php");
     exit();

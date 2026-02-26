@@ -1,6 +1,7 @@
 <?php
 session_start();
 include 'conexion.php';
+//mensaje es para guardar errores
 $mensaje = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dni = trim($_POST['dni'] ?? '');

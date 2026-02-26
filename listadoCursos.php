@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'conexion.php';
+//si el usuario no esta logeado sale de la aplicacion
 if (!isset($_SESSION['dni'])) {
     echo "<p class='error'>Debes iniciar sesión para realizar esta acción.</p>";
     exit();
@@ -31,10 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmtInsert = $conn->prepare($insert);
             if ($stmtInsert->execute([$dni, $codigocurso, $fechasolicitud, $admitido])) {
                 //aqui obtener nombre del curso
-                $sqlCurso = "SELECT nombre FROM cursos WHERE codigo = ?";
-                $stmtCurso = $conn->prepare($sqlCurso);
-                $stmtCurso->execute([$codigocurso]);
-                $curso = $stmtCurso->fetch(PDO::FETCH_ASSOC);
+                $miCunsultaCur = "SELECT nombre FROM cursos WHERE codigo = ?";
+                $stmtCur = $conn->prepare($miCunsultaCur);
+                $stmtCur->execute([$codigocurso]);
+                $curso = $stmtCur->fetch(PDO::FETCH_ASSOC);
                 //aqui creamos el  PDF
                 $pdf = new FPDF();
                 $pdf->AddPage();
@@ -50,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     mkdir('pdfGenerado', 0777, true);
                 }
                 //guarda PDF en el servidor
-                $pdfOutput = 'pdfGenerado/pdf_' . $dni . '.pdf';
-                $pdf->Output('F', $pdfOutput);
+                $rutaPdf = 'pdfGenerado/pdf_' . $dni . '.pdf';
+                $pdf->Output('F', $rutaPdf);
                 //obtener correo del usuario
                 $email = "SELECT correo FROM solicitantes WHERE dni = ?";
                 $stmtEmail = $conn->prepare($email);
@@ -64,25 +65,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 try {
                     $mail->isSMTP();
                     $mail->Host       = '127.0.0.1';
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = 'ana@scarlatti.com';
-                    $mail->Password   = 'ana';
-                    $mail->SMTPSecure  = false;    
-                    $mail->SMTPAutoTLS = false;    
-                    $mail->Port       = 1587;// el unico puerto que funciona
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'ana@scarlatti.com';
+                    $mail->Password = 'ana';
+                    $mail->SMTPSecure = false;    
+                    $mail->SMTPAutoTLS= false;    
+                    $mail->Port= 1587;// el unico puerto que funciona en clase
                     $mail->setFrom('ana@scarlatti.com', 'Ana');
                     $mail->addAddress($emailUsuario);
                     $mail->isHTML(true);
-                    $mail->Subject    = 'Resguardo de Inscripción';
-                    $mail->Body       = '<p>Se ha generado un nuevo resguardo de inscripción.</p>';
-                    $mail->addAttachment($pdfOutput);
+                    $mail->Subject= 'Resguardo de Inscripción';
+                    $mail->Body= '<p>Se ha generado un nuevo resguardo de inscripción.</p>';
+                    $mail->addAttachment($rutaPdf);
                       //
                      // debug para ver la conexion SMTP
                      // $mail->SMTPDebug  = 3; 
                      //$mail->Debugoutput = 'html';
 
                     $mail->send();
-
+                     //no lo pide el ejercicio pero lo he hecho pa ver los datos guardados 
+                     // y si se genera el pdf correctamnte 
                     $mensaje = "
                     <div class='resguardo'>
                         <h3>Resguardo de Inscripción</h3>
@@ -112,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<!--un poco de estilos-->
 <title>Lista de Cursos</title>
         <style>
          body { font-family: Arial; background:#f4f4f4; text-align:center; padding:40px; }
@@ -126,8 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
     <h3>Selecciona un Curso</h3>
         <form method="POST">
+        <?php if (!empty($mensaje)) echo $mensaje; ?>
         <select name="curso">
         <?php
+        //mostrar los cursos que existen en la base de datos
         $miConsulta = "SELECT codigo, nombre FROM cursos WHERE abierto = 1";
         $stmt = $conn->query($miConsulta);
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -136,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ?>
         </select>
         <input type="submit" value="Inscribirse">
+        <a href="index.php" class="button">Volver a la página principal</a>
         </form>
     </div>
 </body>

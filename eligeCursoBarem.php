@@ -1,19 +1,18 @@
 <?php
 session_start();
-require 'conexion.php'; // Conexión PDO
-
-$curso_seleccionado = ''; // Para repintado
-
+require 'conexion.php';
+$cursoSeleccionado = ''; // Para repintado
+//coger el curso por post
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $curso_seleccionado = $_POST['curso'] ?? '';
-    if (!empty($curso_seleccionado)) {
-        // Redirigir a la página de baremación con el curso seleccionado
-        header("Location: baremacion.php?curso=" . urlencode($curso_seleccionado));
+    $cursoSeleccionado = $_POST['curso'] ?? '';
+    if (!empty($cursoSeleccionado)) {
+        //redirigir a la pagina de baremacion con el curso seleccionado
+        header("Location: baremacion.php?curso=" . urlencode($cursoSeleccionado));
         exit();
     }
 }
 
-// Obtener cursos cerrados y con plazo vencido
+//obtener cursos cerrados y con plazo vencido
 $sqlCursos = "SELECT codigo, nombre FROM cursos WHERE abierto = 0 AND plazoinscripcion < CURDATE()";
 $stmt = $conn->query($sqlCursos);
 $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -41,7 +40,7 @@ input[type="submit"]:hover { background:#0056b3; }
     <h3>Selecciona un curso para la baremación</h3>
     <form method="POST">
         <label for="curso">Curso:</label>
-        <select name="curso" id="curso" required>
+        <select name="curso" id="curso">
             <option value="">-- Seleccione un curso --</option>
             <?php foreach ($cursos as $curso): ?>
                 <option value="<?php echo htmlspecialchars($curso['codigo']); ?>" 

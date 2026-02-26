@@ -1,16 +1,13 @@
 <?php
 session_start();
-require 'conexion.php'; // Conexión PDO
-
-// Verificar que el administrador esté autenticado
+require 'conexion.php';
+//verificar que el administrador este autenticado
 if (!isset($_SESSION['dni'])) {
     header("Location: index.php");
     exit();
 }
-
 $mensaje = '';
-
-// Variables para repintar
+//variables para q hacemos repintado del formularios
 $codigo_value = '';
 $nombre_value = '';
 $abierto_value = 0;
@@ -21,60 +18,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['accion'])) {
         $accion = $_POST['accion'];
 
-        // AGREGAR CURSO
+        //añadir curso
         if ($accion == 'agregar') {
             $codigo = trim($_POST['codigo']);
             $nombre = trim($_POST['nombre']);
             $abierto = isset($_POST['abierto']) ? 1 : 0;
             $numeroplazas = intval($_POST['numeroplazas']);
             $plazoinscripcion = $_POST['plazoinscripcion'];
-
-            // Guardar para repintado
+            //guardar para repintado
             $codigo_value = $codigo;
             $nombre_value = $nombre;
             $abierto_value = $abierto;
             $numeroplazas_value = $numeroplazas;
             $plazoinscripcion_value = $plazoinscripcion;
-
+// si lo datos no estan vacios
             if (!empty($codigo) && !empty($nombre) && !empty($numeroplazas) && !empty($plazoinscripcion)) {
                 $sql = "INSERT INTO cursos (codigo, nombre, abierto, numeroplazas, plazoinscripcion) 
                         VALUES (?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-
                 if ($stmt->execute([$codigo, $nombre, $abierto, $numeroplazas, $plazoinscripcion])) {
-                    $mensaje = "<p class='feedback' style='color: green;'>Curso agregado exitosamente.</p>";
+                    $mensaje = "<p class='mensaje' style='color: green;'>Curso agregado exitosamente.</p>";
                     // Limpiar repintado
                     $codigo_value = $nombre_value = $numeroplazas_value = $plazoinscripcion_value = '';
                     $abierto_value = 0;
                 } else {
-                    $mensaje = "<p class='feedback' style='color: red;'>Error al agregar el curso.</p>";
+                    $mensaje = "<p class='mensaje' style='color: red;'>Error al agregar el curso.</p>";
                 }
             } else {
-                $mensaje = "<p class='feedback' style='color: red;'>Todos los campos son obligatorios.</p>";
+                $mensaje = "<p class='mensaje' style='color: red;'>Todos los campos son obligatorios.</p>";
             }
         }
 
-        // ELIMINAR CURSO
+        //eliminar curso
         if ($accion == 'eliminar') {
             $codigo = $_POST['curso'];
             $sql = "DELETE FROM cursos WHERE codigo = ?";
             $stmt = $conn->prepare($sql);
-
             if ($stmt->execute([$codigo])) {
-                $mensaje = "<p class='feedback' style='color: green;'>Curso eliminado exitosamente.</p>";
+                $mensaje = "<p class='mensaje' style='color: green;'>Curso eliminado exitosamente.</p>";
             } else {
-                $mensaje = "<p class='feedback' style='color: red;'>Error al eliminar el curso.</p>";
+                $mensaje = "<p class='mensaje' style='color: red;'>Error al eliminar el curso.</p>";
             }
         }
     }
 }
-
-// Obtener lista de cursos existentes
-$sql = "SELECT * FROM cursos ORDER BY nombre";
-$stmtCursos = $conn->query($sql);
-$cursos = $stmtCursos->fetchAll(PDO::FETCH_ASSOC);
+//obtener lista de cursos existentes
+$miCon = "SELECT * FROM cursos ORDER BY nombre";
+$stmtCur = $conn->query($miCon);
+$cursos = $stmtCur->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -96,44 +88,43 @@ input[type="submit"] {
     margin:10px 0; cursor:pointer; width:100%;
 }
 input[type="submit"]:hover { background:#0056b3; }
-.feedback { font-weight:bold; margin-top:15px; }
+.mensaje { font-weight:bold; margin-top:15px; }
 </style>
 </head>
 <body>
 
 <div class="container">
 <h3>Administrar Cursos</h3>
-
+<!--si hay errores-->
 <?php echo $mensaje; ?>
-
-<!-- Formulario para añadir un curso -->
+<!--formulario para añadir curso -->
 <h4>Añadir Curso</h4>
 <form method="POST">
     <input type="hidden" name="accion" value="agregar">
     <label for="codigo">Código:</label>
-    <input type="text" name="codigo" value="<?php echo htmlspecialchars($codigo_value); ?>" required>
+    <input type="text" name="codigo" value="<?php echo htmlspecialchars($codigo_value); ?>" >
 
     <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" value="<?php echo htmlspecialchars($nombre_value); ?>" required>
+    <input type="text" name="nombre" value="<?php echo htmlspecialchars($nombre_value); ?>" >
 
     <label for="abierto">Abierto:</label>
     <input type="checkbox" name="abierto" value="1" <?php echo $abierto_value ? 'checked' : ''; ?> >
 
     <label for="numeroplazas">Número de Plazas:</label>
-    <input type="number" name="numeroplazas" value="<?php echo htmlspecialchars($numeroplazas_value); ?>" required>
+    <input type="number" name="numeroplazas" value="<?php echo htmlspecialchars($numeroplazas_value); ?>" >
 
     <label for="plazoinscripcion">Plazo de Inscripción:</label>
-    <input type="date" name="plazoinscripcion" value="<?php echo htmlspecialchars($plazoinscripcion_value); ?>" required>
+    <input type="date" name="plazoinscripcion" value="<?php echo htmlspecialchars($plazoinscripcion_value); ?>" >
 
     <input type="submit" value="Añadir Curso">
 </form>
 
-<!-- Formulario para eliminar un curso -->
+<!--formulario para eliminar un curso -->
 <h4>Eliminar Curso</h4>
 <form method="POST">
     <input type="hidden" name="accion" value="eliminar">
     <label for="curso">Seleccionar Curso:</label>
-    <select name="curso" required>
+    <select name="curso">
         <?php foreach ($cursos as $curso): ?>
             <option value="<?php echo htmlspecialchars($curso['codigo']); ?>">
                 <?php echo htmlspecialchars($curso['nombre'] . " - " . $curso['codigo']); ?>

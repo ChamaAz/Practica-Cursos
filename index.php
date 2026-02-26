@@ -72,23 +72,23 @@
 
         <?php
         include 'conexion.php';
-        // Mostrar los cursos solo si están activos
-        $laConsulta = "SELECT codigo, nombre FROM cursos WHERE abierto = 1"; 
+        // Mostrar los cursos todos
+        $laConsulta = "SELECT codigo, nombre FROM cursos "; 
         $stmt = $conn->prepare($laConsulta);
         $stmt->execute();
         $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+      // si exsisten cursos en la base de datos mostrame los sino el mensaje de error
         if (!empty($cursos)) {
             echo "<ul>";
             foreach ($cursos as $curso) {
-                echo "<li>" . htmlspecialchars($curso['nombre']) . " (Código: " . htmlspecialchars($curso['codigo']) . ")</li>";
+                echo "<li>" . htmlspecialchars($curso['nombre']) . " (Codigo: " . htmlspecialchars($curso['codigo']) .")</li>";
             }
             echo "</ul>";
         } else {
             echo "<p>No hay cursos disponibles.</p>";
         }
 
-        $conn = null; // cerrar la conexión
+        $conn = null; //cerrar 
         ?>
     </div>
 </body>

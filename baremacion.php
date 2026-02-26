@@ -1,30 +1,26 @@
 <?php
 require 'conexion.php';
-
-// Verificar si el usuario ha iniciado sesión
+//verificar si el usuario ha iniciado sesión
 if (isset($_SESSION['dni'])) {
     header("Location: index.php");
     exit();
 }
-
-// Verificar si se recibió un curso por POST
+//verificar si se recibio un curso por POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
-    // Obtener el código del curso
+    // Obtener el codigo del curso
     $codigo_curso = $_POST['curso'];
-
-    // Obtener información del curso
-    $sqlCurso = "SELECT nombre, numeroplazas FROM cursos WHERE codigo = ?";
-    $stmtCurso = $conn->prepare($sqlCurso);
-    $stmtCurso->bind_param("i", $codigo_curso);
-    $stmtCurso->execute();
-    $resultCurso = $stmtCurso->get_result();
-    $curso = $resultCurso->fetch_assoc();
-
+    //obtener info del curso
+    $sqlCur = "SELECT nombre, numeroplazas FROM cursos WHERE codigo = ?";
+    $stmtCur = $conn->prepare($sqlCur);
+    $stmtCur->bind_param("i", $codigo_curso);
+    $stmtCur->execute();
+    $resultCur = $stmtCur->get_result();
+    $curso = $resultCur->fetch_assoc();
+//si no existe el curso
     if (!$curso) {
         echo "<p>Error: Curso no encontrado.</p>";
         exit();
     }
-
     // Obtener los solicitantes inscritos en el curso
     $sqlSolicitantes = "SELECT s.dni, su.puntos, su.nombre, su.apellidos, su.coordinadortic,
                         su.grupotic, su.pbilin, su.cargo, su.nombrecargo, su.antiguedad, su.situacion
@@ -41,18 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
         echo "<p>No hay solicitantes inscritos en este curso.</p>";  
         exit();
     }
-
-    // Crear un array para almacenar los solicitantes con los puntos ajustados
+    //crear un array para almacenar los solicitantes con los puntos ajustados
     $solicitantes = [];
-
     while ($row = $resultSolicitantes->fetch_assoc()) {
         $puntos = intval($row['puntos']);
-
-        // Ajustar los puntos según condiciones
+        //ajustar los puntos según condiciones
         if ($row['coordinadortic']) $puntos += 4;
         if ($row['grupotic']) $puntos += 3;
         if ($row['pbilin']) $puntos += 3;
-
         if ($row['cargo']) {
             $cargo = strtolower($row['nombrecargo']);
             if (in_array($cargo, ['director', 'jefe de estudios', 'secretario'])) {
@@ -62,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
             }
         }
 
-        $puntos += $row['antiguedad'];  // Sumar antigüedad
+        $puntos += $row['antiguedad'];  //para sumar antigüedad
 
         if (strtolower($row['situacion']) === 'activo') {
             $puntos += 1;
@@ -76,10 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
         ];
     }
 
-    // Ordenar los solicitantes por puntos de mayor a menor
+    //ordenar los solicitantes por puntos de mayor a menor
     usort($solicitantes, fn($a, $b) => $b['puntos'] <=> $a['puntos']);
-
-    // Mostrar la tabla de solicitantes
+    //mostrar la tabla de solicitantes
     echo "<h2>Baremación del Curso: " . htmlspecialchars($curso['nombre']) . " (" . $codigo_curso . ")</h2>";
     echo "<table border='1'>
             <tr>
@@ -93,13 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
     foreach ($solicitantes as $index => $solicitante) {
         $estado = ($index < $curso['numeroplazas']) ? "Admitido" : "En lista de espera";
         $admitido = ($estado === "Admitido") ? 1 : 0;
-
-        // Actualizar estado en la base de datos
+        //actualizar estado en la base de datos
         $sqlActualizar = "UPDATE solicitudes SET admitido = ? WHERE dni = ? AND codigocurso = ?";
         $stmtActualizar = $conn->prepare($sqlActualizar);
         $stmtActualizar->bind_param("isi", $admitido, $solicitante['dni'], $codigo_curso);
         $stmtActualizar->execute();
-
         echo "<tr>
                 <td>" . htmlspecialchars($solicitante['dni']) . "</td>
                 <td>" . htmlspecialchars($solicitante['nombre']) . "</td>
@@ -111,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['curso'])) {
     echo "</table>";
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>

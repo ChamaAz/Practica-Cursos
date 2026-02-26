@@ -1,6 +1,7 @@
 <?php
-// Después de verificar el usuario y la contraseña
-session_start();  // Asegúrate de llamar session_start() al inicio
-$_SESSION['usuario'] = $usuarioDB['usuario']; // Guarda el nombre del usuario
-$_SESSION['dni'] = $usuarioDB['dni'];  // Guarda el DNI del usuario en la sesion
+//UN FORMULARIO PARA COGER DATOS
+//despues de verificar el usuario y el pass
+session_start();
+$_SESSION['usuario'] = $usuarioDB['usuario']; //guarda el nombre del usuario
+$_SESSION['dni'] = $usuarioDB['dni'];  //guarda el DNI del usuario en la sesion
 ?>

@@ -1,10 +1,9 @@
 <?php
 session_start();
 include 'conexion.php';
-
 $mensaje = '';
 $tipoMensaje = ''; //error
-
+//los datos recibidos desde post
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dni = $_POST['dni'] ?? '';
     $apellidos = $_POST['apellidos'] ?? '';
@@ -22,27 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $antiguedad = isset($_POST['antiguedad']) ? intval($_POST['antiguedad']) : 0;
     $especialidad = $_POST['especialidad'] ?? '';
     $puntos = isset($_POST['puntos']) ? intval($_POST['puntos']) : 0;
-
+//si no estan vacios
     if (!empty($dni) && !empty($apellidos) && !empty($nombre) && !empty($telefono) && !empty($correo)) {
+        //la consulta para hacer la inscripcion
         $sql = "INSERT INTO solicitantes
         (dni, apellidos, nombre, telefono, correo, codigocentro, coordinadortic, grupotic, nombregrupo, pbilin, cargo, nombrecargo, situacion, antiguedad, especialidad, puntos) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+// ejecutamos la consulta
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             $dni, $apellidos, $nombre, $telefono, $correo, $codigocentro,
             $coordinadortic, $grupotic, $nombregrupo, $pbilin, $cargo,
             $nombrecargo, $situacion, $antiguedad, $especialidad, $puntos
         ]);
-
+//importamte guardar el dni en la session
         $_SESSION['dni'] = $dni;
         $mensaje = "Solicitante agregado exitosamente. DNI: $dni";
         $tipoMensaje = 'success';
 
-        // Limpiar POST
+        //limpiar el POST
         $_POST = [];
     } else {
-        $mensaje = "Por favor, complete todos los campos obligatorios.";
+        $mensaje = "Por favor, complete todos los campos obligatorios";
         $tipoMensaje = 'error';
     }
 }
@@ -133,56 +133,61 @@ p.error {
 
 <div class="container">
 <h3>Registrar Solicitante</h3>
-
+<!--si hay errores se muestra el mensaje-->
 <?php if (!empty($mensaje)): ?>
     <p class="<?php echo $tipoMensaje; ?>"><?php echo htmlspecialchars($mensaje); ?></p>
 <?php endif; ?>
-
+<!--el formulario y su repintado-->
 <form method="POST" action="">
+<!---->
+<!--dni-->
     <label>DNI:</label>
     <input type="text" name="dni" maxlength="9" value="<?php echo htmlspecialchars($_POST['dni'] ?? ''); ?>">
-
+<!--apells-->
     <label>Apellidos:</label>
     <input type="text" name="apellidos" maxlength="50" value="<?php echo htmlspecialchars($_POST['apellidos'] ?? ''); ?>">
-
+<!--nombre-->
     <label>Nombre:</label>
     <input type="text" name="nombre" maxlength="50" value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>">
-
+<!--tel-->
     <label>Teléfono:</label>
     <input type="text" name="telefono" maxlength="12" value="<?php echo htmlspecialchars($_POST['telefono'] ?? ''); ?>">
-
+<!--correo-->
     <label>Correo:</label>
     <input type="email" name="correo" maxlength="50" value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>">
-
+<!--codigo de centro-->
     <label>Código Centro:</label>
     <input type="text" name="codigocentro" maxlength="8" value="<?php echo htmlspecialchars($_POST['codigocentro'] ?? ''); ?>">
-
+<!---->
     <label><input type="checkbox" name="coordinadortic" value="1" <?php if(isset($_POST['coordinadortic'])) echo "checked"; ?>> Coordinador TIC</label>
-
     <label><input type="checkbox" name="grupotic" value="1" <?php if(isset($_POST['grupotic'])) echo "checked"; ?>> Grupo TIC</label>
-
+<!--grupo-->
     <label>Nombre Grupo:</label>
     <input type="text" name="nombregrupo" maxlength="25" value="<?php echo htmlspecialchars($_POST['nombregrupo'] ?? ''); ?>">
-
+<!--checkbox-->
     <label><input type="checkbox" name="pbilin" value="1" <?php if(isset($_POST['pbilin'])) echo "checked"; ?>> Programa Bilingüe</label>
-
     <label><input type="checkbox" name="cargo" value="1" <?php if(isset($_POST['cargo'])) echo "checked"; ?>> Cargo</label>
-
+<!-- el cargo-->
     <label>Nombre Cargo:</label>
     <input type="text" name="nombrecargo" maxlength="50" value="<?php echo htmlspecialchars($_POST['nombrecargo'] ?? ''); ?>">
-
+<!--la situacion-->
     <label>Situación:</label>
     <select name="situacion">
         <option value="activo" <?php if(($_POST['situacion'] ?? '')=='activo') echo "selected"; ?>>Activo</option>
         <option value="inactivo" <?php if(($_POST['situacion'] ?? '')=='inactivo') echo "selected"; ?>>Inactivo</option>
     </select>
+    <!--anteguedad-->
     <label>Antigüedad (años):</label>
     <input type="number" name="antiguedad" min="0" max="99" value="<?php echo htmlspecialchars($_POST['antiguedad'] ?? ''); ?>">
+    <!--especialidad-->
     <label>Especialidad:</label>
     <input type="text" name="especialidad" maxlength="50" value="<?php echo htmlspecialchars($_POST['especialidad'] ?? ''); ?>">
+    <!--puntos-->
     <label>Puntos:</label>
     <input type="number" name="puntos" min="0" max="999" value="<?php echo htmlspecialchars($_POST['puntos'] ?? ''); ?>">
+    <!--el botton de enviar datos-->
     <input type="submit" value="Agregar Solicitante">
+    <!--enlace para volver a la pagina principal-->
     <a href="index.php" class="button">Volver a la página principal</a>
 </form>
 </div>
